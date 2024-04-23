@@ -13,6 +13,7 @@ import {toolbox} from './toolbox';
 import './index.css';
 import { installNavController } from './extended_navigation_controller';
 import { installCursor } from './extended_line_cursor';
+import { defaultBlocks } from './defaultBlocks';
 
 // Register the blocks and generator with Blockly
 Blockly.common.defineBlocks(blocks);
@@ -22,7 +23,7 @@ Object.assign(javascriptGenerator.forBlock, forBlock);
 // Set up UI elements and inject Blockly
 const codeDiv = document.getElementById('generatedCode').firstChild;
 const blocklyDiv = document.getElementById('blocklyDiv');
-const ws = Blockly.inject(blocklyDiv, {toolbox});
+const ws = Blockly.inject(blocklyDiv, {renderer: 'zelos', toolbox});
 
 
 // Add keyboard navigation.
@@ -39,8 +40,11 @@ const runCode = () => {
   codeDiv.innerText = code;
 };
 
-// Load the initial state from storage and run the code.
-load(ws);
+// Load the initial state from defaultBlocks.js and run the code.
+// Don't emit events during loading.
+Blockly.Events.disable();
+Blockly.serialization.workspaces.load(defaultBlocks, ws, false);
+Blockly.Events.enable();
 runCode();
 
 // Every time the workspace changes state, save the changes to storage.
