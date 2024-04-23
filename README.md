@@ -12,3 +12,9 @@ State as of April 23:
 Possible next steps:
 - Make the announcer more interesting
 - Add the ability to jump between groups/jump to siblings
+
+To use:
+- Download or clone the repository
+- `cd keyboard-experiment`
+- `npm install`
+- `npm start`
