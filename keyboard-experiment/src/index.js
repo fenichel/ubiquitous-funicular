@@ -11,8 +11,8 @@ import {javascriptGenerator} from 'blockly/javascript';
 import {save, load} from './serialization';
 import {toolbox} from './toolbox';
 import './index.css';
-import { ExtendedNavigationController } from './extended_navigation_controller';
-import { LineCursor } from '@blockly/keyboard-navigation';
+import { installNavController } from './extended_navigation_controller';
+import { installCursor } from './extended_line_cursor';
 
 // Register the blocks and generator with Blockly
 Blockly.common.defineBlocks(blocks);
@@ -24,21 +24,12 @@ const codeDiv = document.getElementById('generatedCode').firstChild;
 const blocklyDiv = document.getElementById('blocklyDiv');
 const ws = Blockly.inject(blocklyDiv, {toolbox});
 
-const navigationController = new ExtendedNavigationController();
-navigationController.init();
-navigationController.addWorkspace(ws);
-// Turns on keyboard navigation.
-navigationController.enable(ws);
 
-const markerManager = Blockly.getMainWorkspace().getMarkerManager();
-const oldCurNode = markerManager.getCursor().getCurNode();
+// Add keyboard navigation.
+installNavController(ws);
+// TODO: Check if I actually need this.
 Blockly.ASTNode.NAVIGATE_ALL_FIELDS = true;
-const lineCursor = new LineCursor();
-markerManager.setCursor(lineCursor);
-
-if (oldCurNode) {
-  markerManager.getCursor().setCurNode(oldCurNode);
-}
+installCursor(Blockly.getMainWorkspace().getMarkerManager());
 
 // This function resets the code and output divs, shows the
 // generated code from the workspace, and evals the code.
