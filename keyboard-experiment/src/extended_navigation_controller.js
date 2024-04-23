@@ -18,10 +18,11 @@ export class ExtendedNavigationController extends NavigationController {
             preconditionFn: (workspace) => {
                 return (true);
             },
+            // Print out the type of the current node.
             callback: (workspace) => {
-                console.log('hello world');
                 const announcer = document.getElementById('announcer');
-                announcer.innerText = 'hello world';
+                const cursor = workspace.getCursor();
+                announcer.innerText = cursor.getCurNode().getType();
                 return true;
             },
         };
