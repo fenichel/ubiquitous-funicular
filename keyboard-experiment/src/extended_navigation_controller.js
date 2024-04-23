@@ -5,40 +5,28 @@ import * as Blockly from 'blockly';
 
 export class ExtendedNavigationController extends NavigationController {
     // override
-    /**
-      * Registers the default keyboard shortcuts for keyboard navigation.
-      * @public
-      */
     init() {
         this.addShortcutHandlers();
         this.registerDefaults();
         this.remapDefaults();
         this.registerAddOns();
     }
-    /**
-   * Keyboard shortcut to move the cursor on the workspace down when in
-   * keyboard navigation mode.
-   * @protected
-   */
+
     registerAnnounce() {
-        /** @type {!Blockly.ShortcutRegistry.KeyboardShortcut} */
         const announceShortcut = {
             name: 'Announce',
             preconditionFn: (workspace) => {
-                return (true
-                );
+                return (true);
             },
             callback: (workspace) => {
                 console.log('hello world');
+                const announcer = document.getElementById('announcer');
+                announcer.innerText = 'hello world';
                 return true;
             },
         };
 
         Blockly.ShortcutRegistry.registry.register(announceShortcut);
-        // const shiftW = Blockly.ShortcutRegistry.registry.createSerializedKey(
-        //     Blockly.utils.KeyCodes.S,
-        //     [Blockly.utils.KeyCodes.SHIFT],
-        // );
         Blockly.ShortcutRegistry.registry.addKeyMapping(
             Blockly.utils.KeyCodes.A,
             announceShortcut.name,
@@ -48,6 +36,7 @@ export class ExtendedNavigationController extends NavigationController {
         this.registerAnnounce();
     }
 
+    // Remap to use arrow keys instead.
     remapDefaults() {
         Blockly.ShortcutRegistry.registry.removeAllKeyMappings(Constants.SHORTCUT_NAMES.OUT);
         Blockly.ShortcutRegistry.registry.addKeyMapping(Blockly.utils.KeyCodes.LEFT, Constants.SHORTCUT_NAMES.OUT);

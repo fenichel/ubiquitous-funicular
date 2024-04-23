@@ -12,6 +12,7 @@ import {save, load} from './serialization';
 import {toolbox} from './toolbox';
 import './index.css';
 import { ExtendedNavigationController } from './extended_navigation_controller';
+import { LineCursor } from '@blockly/keyboard-navigation';
 
 // Register the blocks and generator with Blockly
 Blockly.common.defineBlocks(blocks);
@@ -20,7 +21,6 @@ Object.assign(javascriptGenerator.forBlock, forBlock);
 
 // Set up UI elements and inject Blockly
 const codeDiv = document.getElementById('generatedCode').firstChild;
-const outputDiv = document.getElementById('output');
 const blocklyDiv = document.getElementById('blocklyDiv');
 const ws = Blockly.inject(blocklyDiv, {toolbox});
 
@@ -31,8 +31,14 @@ navigationController.addWorkspace(ws);
 navigationController.enable(ws);
 
 const markerManager = Blockly.getMainWorkspace().getMarkerManager();
-//Blockly.ASTNode.NAVIGATE_ALL_FIELDS = true;
-//markerManager.setCursor(new LineCursor());
+const oldCurNode = markerManager.getCursor().getCurNode();
+Blockly.ASTNode.NAVIGATE_ALL_FIELDS = true;
+const lineCursor = new LineCursor();
+markerManager.setCursor(lineCursor);
+
+if (oldCurNode) {
+  markerManager.getCursor().setCurNode(oldCurNode);
+}
 
 // This function resets the code and output divs, shows the
 // generated code from the workspace, and evals the code.
@@ -40,10 +46,6 @@ const markerManager = Blockly.getMainWorkspace().getMarkerManager();
 const runCode = () => {
   const code = javascriptGenerator.workspaceToCode(ws);
   codeDiv.innerText = code;
-
-  //outputDiv.innerHTML = '';
-
-  //eval(code);
 };
 
 // Load the initial state from storage and run the code.
