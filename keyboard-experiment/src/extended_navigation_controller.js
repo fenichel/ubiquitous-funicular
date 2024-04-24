@@ -3,6 +3,7 @@ import { NavigationController } from '@blockly/keyboard-navigation';
 import { Constants } from '@blockly/keyboard-navigation';
 import { ASTNode, ShortcutRegistry } from 'blockly';
 import { utils as BlocklyUtils } from 'blockly';
+import { keyCodeArrayToString } from './keynames';
 
 export class ExtendedNavigationController extends NavigationController {
     // override
@@ -11,6 +12,43 @@ export class ExtendedNavigationController extends NavigationController {
         this.registerDefaults();
         this.remapDefaults();
         this.registerAddOns();
+    }
+
+    registerListShortcuts() {
+        const listShortcuts = {
+            name: 'List shortcuts',
+            preconditionFn: (workspace) => {
+                return (true);
+            },
+            // List out the current shortcuts.
+            // Adds a table to the announcer area.
+            callback: (workspace) => {
+                const announcer = document.getElementById('announcer');
+
+                const registry = ShortcutRegistry.registry.getRegistry();
+                let text = 
+                `<table>
+<thead>
+  <tr>
+    <td>Shortcut name</td>
+    <td>Shortcut action</td>
+  </tr>
+</thead>`;
+                for (const keyboardShortcut of Object.keys(registry)) {
+                    const codeArray = ShortcutRegistry.registry.getKeyCodesByShortcutName(keyboardShortcut);
+                    const prettyPrinted = keyCodeArrayToString(codeArray);
+                    text += `<tr><td>${keyboardShortcut}</td> <td>${prettyPrinted}</td></tr>`;
+                }
+                announcer.innerHTML = text + '\n</table/>';
+                return true;
+            },
+        };
+
+        ShortcutRegistry.registry.register(listShortcuts);
+        ShortcutRegistry.registry.addKeyMapping(
+            BlocklyUtils.KeyCodes.SLASH,
+            listShortcuts.name,
+        );
     }
 
     registerAnnounce() {
@@ -35,6 +73,59 @@ export class ExtendedNavigationController extends NavigationController {
         );
     }
 
+    registerNextStack() {
+        const nextStackShortcut = {
+            name: 'Go to next stack',
+            preconditionFn: (workspace) => {
+                return (true);
+            },
+            // Print out the type of the current node.
+            callback: (workspace) => {
+                const announcer = document.getElementById('announcer');
+                const cursor = workspace.getCursor();
+                announcer.innerText = 'next stack';
+                return true;
+            },
+        };
+
+        ShortcutRegistry.registry.register(nextStackShortcut);
+        ShortcutRegistry.registry.addKeyMapping(
+            BlocklyUtils.KeyCodes.N,
+            nextStackShortcut.name,
+        );
+    }
+
+    registerPreviousStack() {
+        const previousStackShortcut = {
+            name: 'Go to previous stack',
+            preconditionFn: (workspace) => {
+                return (true);
+            },
+            // Print out the type of the current node.
+            callback: (workspace) => {
+                const announcer = document.getElementById('announcer');
+                const cursor = workspace.getCursor();
+                const curNode = cursor.getCurNode();
+                const curBlock = curNode.getSourceBlock();
+                if (curBlock) {
+                    const rootBlock = curBlock.getRootBlock();
+                    const stackNode = ASTNode.createStackNode(rootBlock);
+                    cursor.setCurNode(stackNode);
+                    announcer.innerText = 'previous stack';
+                } else {
+                    announcer.innerText = 'failed';
+                }
+                return true;
+            },
+        };
+
+        ShortcutRegistry.registry.register(previousStackShortcut);
+        ShortcutRegistry.registry.addKeyMapping(
+            BlocklyUtils.KeyCodes.M,
+            previousStackShortcut.name,
+        );
+    }
+
     registerJumpToRoot() {
         const jumpShortcut = {
             name: 'Jump to root of current stack',
@@ -47,7 +138,7 @@ export class ExtendedNavigationController extends NavigationController {
                 const cursor = workspace.getCursor();
                 const curNode = cursor.getCurNode();
                 const curBlock = curNode.getSourceBlock();
-                if (curBlock) { 
+                if (curBlock) {
                     const rootBlock = curBlock.getRootBlock();
                     const stackNode = ASTNode.createStackNode(rootBlock);
                     cursor.setCurNode(stackNode);
@@ -65,6 +156,7 @@ export class ExtendedNavigationController extends NavigationController {
             jumpShortcut.name,
         );
     }
+
     registerAnnounce() {
         const announceShortcut = {
             name: 'Announce',
@@ -86,9 +178,14 @@ export class ExtendedNavigationController extends NavigationController {
             announceShortcut.name,
         );
     }
+
     registerAddOns() {
         this.registerAnnounce();
+        // Not yet implemented correctly.
+        //this.registerPreviousStack();
+        //this.registerNextStack();
         this.registerJumpToRoot();
+        this.registerListShortcuts();
     }
 
     // Remap to use arrow keys instead.

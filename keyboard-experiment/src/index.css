@@ -37,3 +37,7 @@ pre, code {
 #output {
     height: 50%;
 }
+
+thead {
+    font-weight: bold;
+}
