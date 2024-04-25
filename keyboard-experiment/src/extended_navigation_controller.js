@@ -83,16 +83,18 @@ export class ExtendedNavigationController extends NavigationController {
             callback: (workspace, e, shortcut) => {
                 const announcer = document.getElementById('announcer');
                 const cursor = workspace.getCursor();
-                announcer.innerText = 'next sibling';
 
                 if (this.navigation.getState(workspace) == Constants.STATE.WORKSPACE) {
                     if (this.fieldShortcutHandler(workspace, e, shortcut)) {
+                        announcer.innerText = 'next sibling (handled by field)';
                         return true;
                     }
                     if (cursor.nextSibling()) {
+                        announcer.innerText = 'next sibling (success)';
                         return true;
                     }
                 }
+                announcer.innerText = 'next sibling (no-op)';
                 return false;
             },
         };
@@ -104,34 +106,36 @@ export class ExtendedNavigationController extends NavigationController {
         );
     }
 
-    registerPreviousStack() {
-        const previousStackShortcut = {
-            name: 'Go to previous stack',
+    registerPreviousSibling() {
+        const shortcut = {
+            name: 'Go to previous sibling',
             preconditionFn: (workspace) => {
                 return (true);
             },
-            // Print out the type of the current node.
-            callback: (workspace) => {
+            callback: (workspace, e, shortcut) => {
                 const announcer = document.getElementById('announcer');
                 const cursor = workspace.getCursor();
-                const curNode = cursor.getCurNode();
-                const curBlock = curNode.getSourceBlock();
-                if (curBlock) {
-                    const rootBlock = curBlock.getRootBlock();
-                    const stackNode = ASTNode.createStackNode(rootBlock);
-                    cursor.setCurNode(stackNode);
-                    announcer.innerText = 'previous stack';
-                } else {
-                    announcer.innerText = 'failed';
+
+                if (this.navigation.getState(workspace) == Constants.STATE.WORKSPACE) {
+                    if (this.fieldShortcutHandler(workspace, e, shortcut)) {
+
+                announcer.innerText = 'previous sibling (handled by field)';
+                        return true;
+                    }
+                    if (cursor.previousSibling()) {
+                        announcer.innerText = 'previous sibling (success)';
+                        return true;
+                    }
                 }
-                return true;
+                announcer.innerText = 'previous sibling (no-op)';
+                return false;
             },
         };
 
-        ShortcutRegistry.registry.register(previousStackShortcut);
+        ShortcutRegistry.registry.register(shortcut);
         ShortcutRegistry.registry.addKeyMapping(
             BlocklyUtils.KeyCodes.M,
-            previousStackShortcut.name,
+            shortcut.name,
         );
     }
 
@@ -190,8 +194,7 @@ export class ExtendedNavigationController extends NavigationController {
 
     registerAddOns() {
         this.registerAnnounce();
-        // Not yet implemented correctly.
-        //this.registerPreviousStack();
+        this.registerPreviousSibling();
         this.registerNextSibling();
         this.registerJumpToRoot();
         this.registerListShortcuts();

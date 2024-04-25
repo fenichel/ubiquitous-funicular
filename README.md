@@ -11,11 +11,7 @@ Controls:
 - `r`: Moves the cursor to the root of the current stack.
 - `/`: Prints all currently registered keyboard shortcuts to the announcer region.
 - `n`: Goes to the next sibling stack (if on a stack) or block (if on a block, input, or field).
-
-
-Possible next steps:
-- Make the announcer more interesting
-- Add the ability to jump between groups/jump to siblings
+- `p`: Goes to the previous sibling stack (if on a stack) or block (if on a block, input, or field).
 
 To use:
 - Download or clone the repository
