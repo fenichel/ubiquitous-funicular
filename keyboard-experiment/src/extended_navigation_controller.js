@@ -73,25 +73,34 @@ export class ExtendedNavigationController extends NavigationController {
         );
     }
 
-    registerNextStack() {
-        const nextStackShortcut = {
-            name: 'Go to next stack',
+    registerNextSibling() {
+        const shortcut = {
+            name: 'Go to next sibling',
             preconditionFn: (workspace) => {
                 return (true);
             },
-            // Print out the type of the current node.
-            callback: (workspace) => {
+            // Jump to the next node at the same level, when in the workspace
+            callback: (workspace, e, shortcut) => {
                 const announcer = document.getElementById('announcer');
                 const cursor = workspace.getCursor();
-                announcer.innerText = 'next stack';
-                return true;
+                announcer.innerText = 'next sibling';
+
+                if (this.navigation.getState(workspace) == Constants.STATE.WORKSPACE) {
+                    if (this.fieldShortcutHandler(workspace, e, shortcut)) {
+                        return true;
+                    }
+                    if (cursor.nextSibling()) {
+                        return true;
+                    }
+                }
+                return false;
             },
         };
 
-        ShortcutRegistry.registry.register(nextStackShortcut);
+        ShortcutRegistry.registry.register(shortcut);
         ShortcutRegistry.registry.addKeyMapping(
             BlocklyUtils.KeyCodes.N,
-            nextStackShortcut.name,
+            shortcut.name,
         );
     }
 
@@ -132,7 +141,7 @@ export class ExtendedNavigationController extends NavigationController {
             preconditionFn: (workspace) => {
                 return (true);
             },
-            // Print out the type of the current node.
+            // Jump to the root of the current stack.
             callback: (workspace) => {
                 const announcer = document.getElementById('announcer');
                 const cursor = workspace.getCursor();
@@ -143,10 +152,10 @@ export class ExtendedNavigationController extends NavigationController {
                     const stackNode = ASTNode.createStackNode(rootBlock);
                     cursor.setCurNode(stackNode);
                     announcer.innerText = 'jumped to root';
-                } else {
-                    announcer.innerText = 'could not jump to root';
+                    return true;
                 }
-                return true;
+                announcer.innerText = 'could not jump to root';
+                return false;
             },
         };
 
@@ -183,7 +192,7 @@ export class ExtendedNavigationController extends NavigationController {
         this.registerAnnounce();
         // Not yet implemented correctly.
         //this.registerPreviousStack();
-        //this.registerNextStack();
+        this.registerNextSibling();
         this.registerJumpToRoot();
         this.registerListShortcuts();
     }
