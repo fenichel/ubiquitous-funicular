@@ -26,8 +26,8 @@ export class ExtendedNavigationController extends NavigationController {
                 const announcer = document.getElementById('announcer');
 
                 const registry = ShortcutRegistry.registry.getRegistry();
-                let text = 
-                `<table>
+                let text =
+                    `<table>
 <thead>
   <tr>
     <td>Shortcut name</td>
@@ -119,7 +119,7 @@ export class ExtendedNavigationController extends NavigationController {
                 if (this.navigation.getState(workspace) == Constants.STATE.WORKSPACE) {
                     if (this.fieldShortcutHandler(workspace, e, shortcut)) {
 
-                announcer.innerText = 'previous sibling (handled by field)';
+                        announcer.innerText = 'previous sibling (handled by field)';
                         return true;
                     }
                     if (cursor.previousSibling()) {
@@ -192,12 +192,77 @@ export class ExtendedNavigationController extends NavigationController {
         );
     }
 
+    registerContextOut() {
+        /** @type {!Blockly.ShortcutRegistry.KeyboardShortcut} */
+        const shortcut = {
+            name: 'Context out',
+            preconditionFn: (workspace) => {
+                return workspace.keyboardAccessibilityMode;
+            },
+            callback: (workspace) => {
+                const announcer = document.getElementById('announcer');
+                if (this.navigation.getState(workspace) == Constants.STATE.WORKSPACE) {
+                        announcer.innerText = 'context out';
+                        if (workspace.getCursor().contextOut()) {
+                            return true;
+                        }
+                }
+                announcer.innerText = 'context out (no-op)';
+                return false;
+            },
+        };
+
+        ShortcutRegistry.registry.register(shortcut);
+        const ctrlShiftO = ShortcutRegistry.registry.createSerializedKey(
+          BlocklyUtils.KeyCodes.O,
+          [BlocklyUtils.KeyCodes.SHIFT],
+        );
+        ShortcutRegistry.registry.addKeyMapping(
+            ctrlShiftO,
+            shortcut.name,
+        );
+    }
+
+    registerContextIn() {
+        const shortcut = {
+            name: 'Context in',
+            preconditionFn: (workspace) => {
+                return workspace.keyboardAccessibilityMode;
+            },
+            // Print out the type of the current node.
+            callback: (workspace) => {
+                const announcer = document.getElementById('announcer');
+                const cursor = workspace.getCursor();
+                if (this.navigation.getState(workspace) == Constants.STATE.WORKSPACE) {
+                    if (cursor.contextIn()) {
+                        announcer.innerText = 'context in';
+                        return true;
+                    }
+                }
+                announcer.innerText = 'context in (no-op)'
+                return false;
+            },
+        };
+
+        ShortcutRegistry.registry.register(shortcut);
+        const ctrlShiftI = ShortcutRegistry.registry.createSerializedKey(
+          BlocklyUtils.KeyCodes.I,
+          [BlocklyUtils.KeyCodes.SHIFT],
+        );
+        ShortcutRegistry.registry.addKeyMapping(
+            ctrlShiftI,
+            shortcut.name,
+        );
+    }
+
     registerAddOns() {
         this.registerAnnounce();
         this.registerPreviousSibling();
         this.registerNextSibling();
         this.registerJumpToRoot();
         this.registerListShortcuts();
+        this.registerContextIn();
+        this.registerContextOut();
     }
 
     // Remap to use arrow keys instead.

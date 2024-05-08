@@ -65,6 +65,41 @@ export class ExtendedLineCursor extends LineCursor {
     
       }
     
+    contextOut() {
+      const curNode = this.getCurNode();
+      if (!curNode) {
+        return null;
+      }
+
+      // Returns null at the workspace level.
+      // TODO: Decide where the cursor goes from the workspace level.
+      let newNode = curNode.out();  
+      if (newNode) {
+        this.setCurNode(newNode);
+      }
+      return newNode;
+    }
+
+    contextIn() {
+      let curNode = this.getCurNode();
+      if (!curNode) {
+        return null;
+      }
+      // If we are on a previous or output connection, go to the block level
+      // before performing next operation.
+      if (
+        curNode.getType() === ASTNode.types.PREVIOUS ||
+        curNode.getType() === ASTNode.types.OUTPUT
+      ) {
+        curNode = curNode.next();
+      }
+      const newNode = curNode?.in() ?? null;
+  
+      if (newNode) {
+        this.setCurNode(newNode);
+      }
+      return newNode;
+    }
 }
 
 export function installCursor(markerManager) {
