@@ -12,6 +12,8 @@ Controls:
 - `/`: Prints all currently registered keyboard shortcuts to the announcer region.
 - `n`: Goes to the next sibling stack (if on a stack) or block (if on a block, input, or field).
 - `p`: Goes to the previous sibling stack (if on a stack) or block (if on a block, input, or field).
+- `shift-i`: Goes *in* a level of context.
+- `shift-o`: Goes *out* a level of context.
 
 To use:
 - Download or clone the repository
